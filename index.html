@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ElizaSavoy · Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson:   #8b1a1a;
+      --deep:      #6b0a0a;
+      --gold:      #f0b429;
+      --pink:      #ff6b9d;
+      --white:     #fff0f0;
+      --pixel:     'Press Start 2P', monospace;
+      --vt:        'VT323', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: #6b0a0a;
+      background-image:
+        radial-gradient(ellipse at 50% 0%, #8b1a1a 0%, #6b0a0a 50%, #3a0505 100%),
+        repeating-linear-gradient(0deg,  transparent, transparent 31px, rgba(255,255,255,.03) 32px),
+        repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(255,255,255,.03) 32px);
+      color: var(--white);
+      font-family: var(--vt);
+      font-size: 20px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='0' y='0' width='8' height='8' fill='%23f0b429'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23f0b429'/%3E%3C/svg%3E") 8 8, crosshair;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,.12) 3px, rgba(0,0,0,.12) 4px
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ─── LIGHTBOX ─── */
+    #lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.93);
+      z-index: 100000;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 95vw;
+      max-height: 95vh;
+      object-fit: contain;
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 60px rgba(240,180,41,.3);
+    }
+    #lightbox-close {
+      position: absolute;
+      top: 14px; right: 18px;
+      font-family: var(--pixel);
+      font-size: 10px;
+      color: var(--gold);
+      background: var(--deep);
+      border: 2px solid var(--gold);
+      padding: 6px 10px;
+      cursor: pointer;
+      z-index: 100001;
+    }
+
+    .hearts-bg {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .heart {
+      position: absolute;
+      font-size: 14px;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(100vh) scale(0.6); opacity: 0; }
+      10%  { opacity: .7; }
+      90%  { opacity: .4; }
+      100% { transform: translateY(-120px) scale(1); opacity: 0; }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+    }
+
+    /* ─── BANNER ─── */
+    .banner-wrap {
+      width: 100%;
+      border-bottom: 4px solid var(--gold);
+      position: relative;
+      line-height: 0;
+      /* limita altura no desktop, centralizado */
+      max-height: 320px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .banner-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      image-rendering: pixelated;
+      /* no desktop a imagem é grande: usa object-fit para não esticar */
+      max-height: 320px;
+      object-fit: contain;
+      object-position: top center;
+    }
+
+    /* mobile: deixa a imagem mostrar mais, proporcionalmente */
+    @media (max-width: 600px) {
+      .banner-wrap {
+        max-height: none;
+        overflow: visible;
+      }
+      .banner-wrap img {
+        max-height: none;
+        object-fit: unset;
+      }
+    }
+
+    .banner-placeholder {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #6b0a0a 0%, #3a0505 100%);
+    }
+    .banner-placeholder span { font-family: var(--pixel); font-size: 10px; color: var(--gold); opacity: .6; }
+
+    /* ─── HEADER ─── */
+    .site-header {
+      text-align: center;
+      padding: 40px 0 24px;
+    }
+    .site-header h1 {
+      font-family: var(--pixel);
+      font-size: clamp(12px, 3vw, 22px);
+      color: var(--gold);
+      text-shadow: 3px 3px 0 #000, 0 0 24px rgba(240,180,41,.5);
+      letter-spacing: 2px;
+      animation: flicker 4s infinite;
+    }
+    @keyframes flicker {
+      0%,19%,21%,23%,25%,54%,56%,100% { opacity: 1; }
+      20%,24%,55% { opacity: .4; }
+    }
+    .site-header p {
+      margin-top: 14px;
+      font-family: var(--vt);
+      font-size: 24px;
+      color: var(--pink);
+      letter-spacing: 1px;
+    }
+
+    .pixel-divider {
+      width: 100%;
+      height: 8px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--gold) 0px, var(--gold) 8px,
+        transparent 8px, transparent 16px,
+        var(--pink) 16px, var(--pink) 24px,
+        transparent 24px, transparent 32px
+      );
+      margin: 8px 0 40px;
+    }
+
+    .section-title {
+      font-family: var(--pixel);
+      font-size: clamp(9px, 2vw, 14px);
+      color: var(--white);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .section-title::before,
+    .section-title::after { content: '♥'; color: var(--pink); margin: 0 12px; }
+
+    /* ─── CAROUSEL ─── */
+    .carousel-outer {
+      position: relative;
+      padding: 0 56px;
+    }
+    @media (max-width: 600px) {
+      .carousel-outer { padding: 0 40px; }
+    }
+
+    .carousel-track-wrap {
+      overflow: hidden;
+      border: 4px solid var(--crimson);
+      box-shadow:
+        0 0 0 2px var(--gold),
+        0 0 32px rgba(240,180,41,.2),
+        inset 0 0 16px rgba(0,0,0,.5);
+      background: #1a0303;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform .5s cubic-bezier(.4,0,.2,1);
+      will-change: transform;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f0101;
+    }
+
+    .carousel-slide::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .carousel-slide.flash::after {
+      opacity: .35;
+      transition: opacity 0s;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    /* ─── BOTÕES ─── */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      background: var(--deep);
+      border: 3px solid var(--gold);
+      color: var(--gold);
+      font-family: var(--pixel);
+      font-size: 16px;
+      width: 44px; height: 44px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s, transform .15s, box-shadow .15s;
+    }
+    .carousel-btn:hover {
+      background: var(--gold);
+      color: var(--deep);
+      transform: translateY(-50%) scale(1.12);
+      box-shadow: 0 0 12px rgba(240,180,41,.5);
+    }
+    .carousel-btn:active { transform: translateY(-50%) scale(.92); box-shadow: none; }
+    .carousel-btn.prev { left: 0; }
+    .carousel-btn.next { right: 0; }
+
+    /* ─── DOTS ─── */
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      background: var(--crimson);
+      border: 2px solid var(--gold);
+      cursor: pointer;
+      transition: background .2s, transform .2s, box-shadow .2s;
+    }
+    .dot.active {
+      background: var(--gold);
+      transform: scale(1.3);
+      box-shadow: 0 0 6px rgba(240,180,41,.6);
+    }
+
+    .carousel-counter {
+      text-align: center;
+      font-family: var(--pixel);
+      font-size: 9px;
+      color: var(--pink);
+      margin-top: 12px;
+    }
+
+    /* ─── THUMBNAILS ─── */
+    .thumb-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-top: 24px;
+      padding-bottom: 8px;
+      scrollbar-color: var(--gold) var(--deep);
+      scrollbar-width: thin;
+    }
+    .thumb-strip::-webkit-scrollbar { height: 4px; }
+    .thumb-strip::-webkit-scrollbar-track { background: var(--deep); }
+    .thumb-strip::-webkit-scrollbar-thumb { background: var(--gold); }
+
+    .thumb {
+      min-width: 80px; height: 56px;
+      object-fit: cover;
+      border: 2px solid var(--crimson);
+      cursor: pointer;
+      transition: border-color .2s, transform .2s, opacity .2s, box-shadow .2s;
+      opacity: .6;
+    }
+    .thumb.active, .thumb:hover {
+      border-color: var(--gold);
+      opacity: 1;
+      transform: scale(1.06);
+      box-shadow: 0 0 8px rgba(240,180,41,.4);
+    }
+
+    /* ─── EMPTY ─── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      border: 4px dashed var(--crimson);
+    }
+    .empty-state p { font-family: var(--pixel); font-size: 10px; color: rgba(255,240,240,.4); line-height: 2; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      font-family: var(--pixel);
+      font-size: 8px;
+      color: rgba(255,240,240,.3);
+      padding: 40px 0 20px;
+      line-height: 2.4;
+    }
+    footer span { color: var(--pink); }
+
+    /* ─── LOADING ─── */
+    #loading {
+      text-align: center;
+      padding: 40px;
+      font-family: var(--pixel);
+      font-size: 10px;
+      color: var(--gold);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsContainer"></div>
+
+<div class="banner-wrap" id="bannerWrap">
+  <div class="banner-placeholder" id="bannerPlaceholder">
+    <span></span>
+  </div>
+</div>
+
+<div class="page">
+
+  <header class="site-header">
+    <h1>✦ PORTFOLIO DE QUARTOS ✦</h1>
+    <p>Habblet</p>
+  </header>
+  <div class="pixel-divider"></div>
+
+  <h2 class="section-title">MEUS QUARTOS</h2>
+
+  <div id="loading">Carregando quartos...</div>
+
+  <div class="carousel-outer" id="carouselOuter" style="display:none">
+    <button class="carousel-btn prev" id="prevBtn" aria-label="Anterior">◀</button>
+    <div class="carousel-track-wrap">
+      <div class="carousel-track" id="carouselTrack"></div>
+    </div>
+    <button class="carousel-btn next" id="nextBtn" aria-label="Próximo">▶</button>
+  </div>
+
+  <div class="carousel-dots" id="dotsContainer"></div>
+  <div class="carousel-counter" id="counter"></div>
+  <div class="thumb-strip" id="thumbStrip"></div>
+
+  <div class="empty-state" id="emptyState" style="display:none">
+    <p>
+      NENHUM QUARTO ENCONTRADO<br><br>
+      Adicione imagens na pasta assets/<br>
+      com nomes: quarto1.png · quarto2.png · quarto3.png...
+    </p>
+  </div>
+
+  <footer>
+    <div>Feito com <span>♥</span> ·</div>
+    <div>Eliza Savoy</div>
+  </footer>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-close">✕ FECHAR</button>
+  <img id="lightbox-img" src="" alt="Zoom" />
+</div>
+
+<script>
+(function spawnHearts() {
+  const container = document.getElementById('heartsContainer');
+  const emojis = ['♥', '❤', '♡'];
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = emojis[i % emojis.length];
+    h.style.cssText = `
+      left: ${Math.random() * 100}%;
+      font-size: ${8 + Math.random() * 12}px;
+      color: ${Math.random() > .5 ? '#ff6b9d' : '#f0b429'};
+      animation-duration: ${6 + Math.random() * 10}s;
+      animation-delay: ${Math.random() * 10}s;
+    `;
+    container.appendChild(h);
+  }
+})();
+
+(function loadBanner() {
+  const img = new Image();
+  img.onload = () => {
+    document.getElementById('bannerPlaceholder').style.display = 'none';
+    document.getElementById('bannerWrap').appendChild(img);
+  };
+  img.src = 'assets/banner.png';
+  img.alt = 'Banner';
+  img.style.cssText = 'width:100%;height:auto;display:block;image-rendering:pixelated;';
+})();
+
+async function loadRooms(max = 200) {
+  const rooms = [];
+  const tryLoad = (src) => new Promise((res) => {
+    const img = new Image();
+    img.onload  = () => res(src);
+    img.onerror = () => res(null);
+    img.src = src;
+  });
+  let i = 1;
+  while (i <= max) {
+    const batch = [];
+    for (let j = i; j < i + 10 && j <= max; j++) batch.push(tryLoad(`assets/quarto${j}.png`));
+    const results = await Promise.all(batch);
+    let foundAny = false;
+    for (const r of results) { if (r !== null) { rooms.push(r); foundAny = true; } }
+    if (!foundAny) break;
+    i += 10;
+  }
+  return rooms;
+}
+
+let current = 0;
+let total = 0;
+let animating = false;
+
+function buildCarousel(rooms) {
+  total = rooms.length;
+  const track  = document.getElementById('carouselTrack');
+  const dots   = document.getElementById('dotsContainer');
+  const thumbs = document.getElementById('thumbStrip');
+
+  rooms.forEach((src, idx) => {
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `Quarto ${idx + 1}`;
+    img.loading = 'lazy';
+    img.addEventListener('click', () => openLightbox(src));
+    slide.appendChild(img);
+    track.appendChild(slide);
+
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (idx === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', `Ir para quarto ${idx + 1}`);
+    dot.addEventListener('click', () => goTo(idx));
+    dots.appendChild(dot);
+
+    const thumb = document.createElement('img');
+    thumb.className = 'thumb' + (idx === 0 ? ' active' : '');
+    thumb.src = src;
+    thumb.alt = `Quarto ${idx + 1}`;
+    thumb.loading = 'lazy';
+    thumb.addEventListener('click', () => goTo(idx));
+    thumbs.appendChild(thumb);
+  });
+
+  updateUI();
+}
+
+function goTo(idx) {
+  if (animating || idx === current) return;
+  animating = true;
+  current = (idx + total) % total;
+
+  const slides = document.querySelectorAll('.carousel-slide');
+  slides.forEach(s => s.classList.add('flash'));
+  setTimeout(() => slides.forEach(s => s.classList.remove('flash')), 80);
+
+  updateUI();
+  setTimeout(() => { animating = false; }, 520);
+}
+
+function updateUI() {
+  const track   = document.getElementById('carouselTrack');
+  const dots    = document.querySelectorAll('.dot');
+  const thumbs  = document.querySelectorAll('.thumb');
+  const counter = document.getElementById('counter');
+
+  track.style.transform = `translateX(-${current * 100}%)`;
+
+  dots.forEach((d, i)  => d.classList.toggle('active', i === current));
+  thumbs.forEach((t, i) => {
+    t.classList.toggle('active', i === current);
+    if (i === current) t.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
+  });
+
+  counter.textContent = `${current + 1} / ${total}`;
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft')  goTo(current - 1);
+  if (e.key === 'ArrowRight') goTo(current + 1);
+});
+
+let touchStartX = 0;
+document.getElementById('carouselTrack').addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+}, { passive: true });
+document.getElementById('carouselTrack').addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
+}, { passive: true });
+
+(async function init() {
+  const rooms = await loadRooms(200);
+  document.getElementById('loading').style.display = 'none';
+  if (rooms.length === 0) {
+    document.getElementById('emptyState').style.display = 'block';
+    return;
+  }
+  document.getElementById('carouselOuter').style.display = 'block';
+  buildCarousel(rooms);
+})();
+
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = src;
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('lightbox').addEventListener('click', (e) => {
+  if (e.target.id === 'lightbox' || e.target.id === 'lightbox-img') closeLightbox();
+});
+document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>
